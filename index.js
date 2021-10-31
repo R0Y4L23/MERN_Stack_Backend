@@ -39,6 +39,11 @@ app.use(express.urlencoded({
 app.use(upload.array());
 app.use(express.static('public'));
 
+app.get("/test", (req, res) => {
+    return res.status(200).send({
+        "Message": "Welcome to Simply API without Token"
+    })
+})
 
 app.get("/", auth, (req, res) => {
     return res.status(200).send({
