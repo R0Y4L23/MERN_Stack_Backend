@@ -20,6 +20,8 @@ const {
     check_login
 } = require('./db');
 
+
+console.log("inside server")
 mongoose.connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
