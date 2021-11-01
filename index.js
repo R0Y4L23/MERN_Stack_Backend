@@ -7,7 +7,7 @@ const {
     validationResult
 } = require('express-validator');
 const auth = require("./auth")
-require("dotenv").config()
+//require("dotenv").config()
 const mongoose = require('mongoose');
 var multer = require('multer');
 var upload = multer();
