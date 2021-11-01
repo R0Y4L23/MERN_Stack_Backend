@@ -17,7 +17,11 @@ const {
     save_data,
     update_by_id,
     delete_by_id,
-    check_login
+    check_login,
+    post_data,
+    post_comment,
+    get_all_post,
+    get_all_comment
 } = require('./db');
 
 
@@ -176,7 +180,67 @@ app.delete("/user", auth, (req, res) => {
     })
 })
 
+app.get("/posts", auth, async (req, res) => {
+    let data = await get_all_post()
+    return res.status(200).send({
+        "Message": "Retrieved Successfully",
+        "Body": data
+    })
+})
+
+app.get("/comment/:id",auth,async (req, res) => {
+    if(!req.params.id)
+    return res.status(400).send({"Message":"No ID Found"})
+    let data = await get_all_comment(req.params.id)
+    return res.status(200).send({
+        "Message": "Retrieved Successfully",
+        "Body": data
+    })
+})
+
+app.post("/post",auth,
+body("title").isLength({min:10}).withMessage("Title must be minimum of 10 characters"),
+body("type").isIn(['joke', 'meme', 'quote', 'fact', 'thought']).withMessage('Type contain invalid value'),
+async (req,res)=>{
+    const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
+    let data = req.body
+    data["postedBy"]=req.userinfo.email
+    let m =await post_data(data)
+    let payload = {}
+    payload["Message"] = m
+    payload["Body"] = data
+    return res.status(200).send(payload)
+})
+
+app.post("/comment",auth,
+body("text").isLength({min:10}).withMessage("Comment must be minimum of 10 characters"),
+body("ofPost").exists().withMessage("ofPost is required"),
+async (req,res)=>{
+    const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                errors: errors.array()
+            });
+        }
+    let data = req.body
+    data["commentedBy"]=req.userinfo.email
+    let m =await post_comment(data)
+    let payload = {}
+    payload["Message"] = m
+    payload["Body"] = data
+    return res.status(200).send(payload)
+})
+
 app.get('*', function (req, res) {
+    res.status(404).send('What??? This is a wrong endpoint...');
+});
+
+app.post('*', function (req, res) {
     res.status(404).send('What??? This is a wrong endpoint...');
 });
 

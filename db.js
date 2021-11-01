@@ -1,5 +1,5 @@
 const {
-    User
+    User,Post,Comment
 } = require("./model.js");
 var bcrypt = require('bcryptjs');
 
@@ -30,7 +30,7 @@ const save_data = async (data) => {
         return "Username already in Use"
     }
     try {
-        User.create(data, (d) => {
+        User.create(data, () => {
             console.log("Posted")
         })
         return "Posted Successfully"
@@ -78,11 +78,49 @@ const check_login = async (data) => {
     }
 }
 
+const post_data = async (data) => {
+    try {
+        await Post.create(data, () => {
+            console.log("Posted")
+        })
+        return "Posted Successfully"
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const post_comment = async (data) => {
+    try {
+        await Comment.create(data, () => {
+            console.log("Posted")
+        })
+        return "Posted Successfully"
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const get_all_post = async () => {
+    let data = await Post.find()
+    return data
+}
+
+const get_all_comment = async (id) => {
+    let data = await Comment.find({
+        ofPost: id
+    })
+    return data
+}
+
 module.exports = {
     show_all_data,
     show_data_by_id,
     save_data,
     update_by_id,
     delete_by_id,
-    check_login
+    check_login,
+    post_data,
+    post_comment,
+    get_all_post,
+    get_all_comment
 }
