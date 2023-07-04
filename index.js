@@ -18,10 +18,14 @@ const {
     update_by_id,
     delete_by_id,
     check_login,
+
     post_data,
     post_comment,
+    post_like,
+
     get_all_post,
-    get_all_comment
+    get_all_comment,
+    get_all_likes_by_user,
 } = require('./db');
 
 
@@ -198,6 +202,11 @@ app.get("/comment/:id", auth, async (req, res) => {
     })
 })
 
+app.get("/like", auth, async (req, res) => {
+    let data = await get_all_likes_by_user(req.userinfo.email);
+    return res.status(200).send({ "Body": data })
+})
+
 app.post("/post", auth,
     body("title").isLength({ min: 10 }).withMessage("Title must be minimum of 10 characters"),
     body("type").isIn(['joke', 'meme', 'quote', 'fact', 'thought']).withMessage('Type contain invalid value'),
@@ -235,6 +244,22 @@ app.post("/comment", auth,
         payload["Body"] = data
         return res.status(200).send(payload)
     })
+
+app.post("/like", auth, body("ofPost").exists().withMessage("ofPost is required"), async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            errors: errors.array()
+        });
+    }
+    let data = req.body
+    data["likedBy"] = req.userinfo.email
+    let m = await post_like(data)
+    let payload = {}
+    payload["Message"] = m
+    payload["Body"] = data
+    return res.status(200).send(payload)
+})
 
 app.get('*', function (req, res) {
     res.status(404).send('What??? This is a wrong endpoint...');

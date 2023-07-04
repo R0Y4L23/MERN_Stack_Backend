@@ -82,8 +82,26 @@ const commentSchema = new Schema({
 
 const Comment = mongoose.model('Comment', commentSchema);
 
+const likeSchema = new Schema({
+    date: {
+        type: Date,
+        default: Date.now()
+    },
+    ofPost: {
+        type: Schema.Types.ObjectId,
+        ref: 'Post'
+    },
+    likedBy: {
+        type: String,
+        ref: 'User'
+    }
+})
+
+const Like = mongoose.model('Like', likeSchema)
+
 module.exports = {
     User,
     Post,
-    Comment
+    Comment,
+    Like
 }

@@ -1,10 +1,10 @@
 const {
-    User,Post,Comment
+    User, Post, Comment, Like
 } = require("./model.js");
 var bcrypt = require('bcryptjs');
 
 const show_all_data = async () => {
-    let data = await User.find()
+    let data = await User.find().select("-password").select("-email")
     return data
 }
 
@@ -100,6 +100,36 @@ const post_comment = async (data) => {
     }
 }
 
+const post_like = async (data) => {
+    try {
+        let id = data["ofPost"]
+        let d = await Like.findOne(data)
+        if (d == null) {
+            await Like.create(data, async () => {
+                await Post.updateOne({ '_id': id }, { $inc: { "likes": 1 } })
+
+            })
+            return "Liked Successfully"
+        }
+        else {
+            await Like.deleteOne(data)
+            await Post.updateOne({ '_id': id }, { $inc: { "likes": -1 } })
+            return "Unliked Successfully"
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const get_all_likes_by_user = async (email) => {
+    try {
+        let data = await Like.find({ "likedBy": email })
+        return data
+    } catch (error) {
+        return []
+    }
+}
+
 const get_all_post = async () => {
     let data = await Post.find()
     return data
@@ -121,6 +151,8 @@ module.exports = {
     check_login,
     post_data,
     post_comment,
+    post_like,
     get_all_post,
-    get_all_comment
+    get_all_comment,
+    get_all_likes_by_user
 }
